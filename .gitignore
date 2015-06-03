@@ -1,3 +1,9 @@
+# Vim
+.*.swp
+
+# Eagle CAD
+*.[sbl]#[0-9]
+
 # Object files
 *.o
 *.ko
@@ -30,3 +36,4 @@
 
 # Debug files
 *.dSYM/
+
