@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -6756,7 +6756,7 @@ Digital-output relative humidity &amp; temperature sensor/module
 <part name="R7" library="rc-master-smd" deviceset="R_" device="0603" value="10K"/>
 <part name="GND8" library="rs485" deviceset="GND" device=""/>
 <part name="LED1" library="led" deviceset="LED" device="CHIP-LED0805" value="Green"/>
-<part name="R2" library="rc-master-smd" deviceset="R_" device="0603" value="220"/>
+<part name="R2" library="rc-master-smd" deviceset="R_" device="0603" value="1K"/>
 <part name="SWD1" library="jtag" deviceset="SWD-6" device=""/>
 <part name="G1" library="battery" deviceset="1220SMT" device="" value="3V"/>
 <part name="SD1" library="sd-mmc" deviceset="TF-HOLDER" device=""/>
@@ -6776,7 +6776,7 @@ Digital-output relative humidity &amp; temperature sensor/module
 <part name="R3" library="rc-master-smd" deviceset="R_" device="0603" value="22"/>
 <part name="R4" library="rc-master-smd" deviceset="R_" device="0603" value="22"/>
 <part name="R5" library="rc-master-smd" deviceset="R_" device="0603" value="10K"/>
-<part name="Q1" library="semiconductor" deviceset="PNP-" device="SOT23"/>
+<part name="Q1" library="semiconductor" deviceset="PNP-" device="SOT23" value="MMBT2907"/>
 <part name="+3V33" library="supply1" deviceset="+3V3" device=""/>
 <part name="D1" library="semicon-smd-ipc" deviceset="D-" device="SMB"/>
 <part name="P+1" library="supply1" deviceset="+5V" device=""/>

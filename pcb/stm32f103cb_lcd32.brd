@@ -1259,7 +1259,7 @@ design rules under a new name.</description>
 <attribute name="NAME" x="90.17" y="26.035" size="1.016" layer="25" ratio="18"/>
 <attribute name="VALUE" x="90.805" y="22.225" size="1.016" layer="27" ratio="18"/>
 </element>
-<element name="R2" library="rc-master-smd" package="R0603" value="220" x="88.265" y="24.765" smashed="yes" rot="R180">
+<element name="R2" library="rc-master-smd" package="R0603" value="1K" x="88.265" y="24.765" smashed="yes" rot="R180">
 <attribute name="NAME" x="86.614" y="24.35225" size="0.8128" layer="25" ratio="18" rot="R90"/>
 <attribute name="VALUE" x="89.789" y="26.289" size="0.6096" layer="27" ratio="10" rot="R180"/>
 </element>
@@ -1320,7 +1320,7 @@ design rules under a new name.</description>
 <attribute name="NAME" x="79.27975" y="22.95525" size="0.8128" layer="25" ratio="18" rot="R270"/>
 <attribute name="VALUE" x="78.00975" y="26.13025" size="0.6096" layer="27" ratio="10" rot="R270"/>
 </element>
-<element name="Q1" library="semiconductor" package="SOT23" value="" x="82.55" y="22.86" smashed="yes" rot="R270">
+<element name="Q1" library="semiconductor" package="SOT23" value="MMBT2907" x="82.55" y="22.86" smashed="yes" rot="R270">
 <attribute name="NAME" x="81.915" y="24.60625" size="1.016" layer="25" ratio="18"/>
 <attribute name="VALUE" x="81.28" y="19.685" size="1.016" layer="27" ratio="18"/>
 </element>
