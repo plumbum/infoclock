@@ -12,3 +12,9 @@ Features
   * Buzzer;
   * DHT22 themperature/humidity sensor.
 
+Library
+-------
+
+  * [ChibiOS/RT](http://www.chibios.org/)
+  * [uGFX](http://ugfx.org/)
+
