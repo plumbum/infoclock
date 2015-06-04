@@ -136,7 +136,8 @@ static msg_t Thread1(void *arg)
 /*
  * Application entry point.
  */
-int main(void) {
+int main(void)
+{
     Thread *shelltp = NULL;
 
     /*
