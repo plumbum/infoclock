@@ -24,8 +24,8 @@
 /*
  * Board identifier.
  */
-#define BOARD_EASY_LCD32
-#define BOARD_NAME              "Easy LCD32"
+#define BOARD_HMI_EASY
+#define BOARD_NAME              "HMI easy controller"
 
 /*
  * Board frequencies.
@@ -41,7 +41,15 @@
 /*
  * IO pins assignments.
  */
+#define GPIOA_LCD_RS            0
+#define GPIOA_LCD_WR            1
+#define GPIOA_BUZZER            2
 #define GPIOA_USB_DISC          3
+#define GPIOA_SPI1_CS           4
+#define GPIOA_SPI1_SCLK         5
+#define GPIOA_SPI1_MISO         6
+#define GPIOA_SPI1_MOSI         7
+#define GPIOA_LCD_BL            8
 
 /*
  * I/O ports initial setup, this configuration is established soon after reset
@@ -70,17 +78,29 @@
 /*
  * Port A setup.
  * Everything input with pull-up except:
- * PA0  - Normal input      (BUTTON).
- * PA2  - Alternate output  (USART2 TX).
- * PA3  - Normal input      (USART2 RX).
+ * PA0  - PP                (LCD_RS).
+ * PA1  - PP                (#LCD_WR)
+ * PA2  - Alternate output  (BUZZER)
+ * PA3  - PP                (#USB_DIS)
+ * PA4  - PP                (#SPI1_CS)
+ * PA5  - Alternate output  (SPI1_SCLK)
+ * PA6  - Alternate output  (SPI1_MISO)
+ * PA7  - Alternate output  (SPI1_MOSI)
+ * PA8  - PP                (LCD_BL)
+ * PA9  - Alternate output  (USART1 TX).
+ * PA10 - Normal input      (USART1 RX).
+ * PA13 - Normal input      (#CARD)
+ * PA14 - PP                (#LCD_RD)
+ * PA15 - PP                (#TP_CS)
  */
-#define VAL_GPIOACRL            0x88883888      /*  PA7...PA0 */
-#define VAL_GPIOACRH            0x88888888      /* PA15...PA8 */
+#define VAL_GPIOACRL            0x88883833      /*  PA7...PA0 */
+#define VAL_GPIOACRH            0x38888883      /* PA15...PA8 */
 #define VAL_GPIOAODR            0xFFFFFFFF
 
 /*
  * Port B setup.
  * Everything input with pull-up except:
+ * PB0-PB15 - PP (Display D0-D15)
  */
 #define VAL_GPIOBCRL            0x88888888      /*  PB7...PB0 */
 #define VAL_GPIOBCRH            0x88888888      /* PB15...PB8 */
@@ -89,13 +109,10 @@
 /*
  * Port C setup.
  * Everything input with pull-up except:
- * PC6  - Normal input because there is an external resistor.
- * PC7  - Normal input because there is an external resistor.
- * PC11 - Open Drain output (USB disconnect).
- * PC12 - Push Pull output (LED).
+ * PC13 - Push Pull output (LED).
  */
 #define VAL_GPIOCCRL            0x44888888      /*  PC7...PC0 */
-#define VAL_GPIOCCRH            0x88888888      /* PC15...PC8 */
+#define VAL_GPIOCCRH            0x88388888      /* PC15...PC8 */
 #define VAL_GPIOCODR            0xFFFFFFFF
 
 /*
