@@ -206,3 +206,10 @@ ULIBS =
 
 RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
 include $(RULESPATH)/rules.mk
+
+
+.PHONY: tags openocd load stlink stload
+
+tags:
+	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ${CHIBIOS}/os
+
