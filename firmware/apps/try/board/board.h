@@ -43,13 +43,16 @@
  */
 #define GPIOA_LCD_RS            0
 #define GPIOA_LCD_WR            1
-#define GPIOA_BUZZER            2
+#define GPIOA_LCR_RD            2
 #define GPIOA_USB_DISC          3
 #define GPIOA_SPI1_CS           4
 #define GPIOA_SPI1_SCLK         5
 #define GPIOA_SPI1_MISO         6
 #define GPIOA_SPI1_MOSI         7
 #define GPIOA_LCD_BL            8
+#define GPIOA_U1_TX             9
+#define GPIOA_U1_RX             10
+#define GPIOA_TP_CS             15
 
 /*
  * I/O ports initial setup, this configuration is established soon after reset
@@ -78,9 +81,9 @@
 /*
  * Port A setup.
  * Everything input with pull-up except:
- * PA0  - PP                (LCD_RS).
+ * PA0  - PP                (LCD_RS)
  * PA1  - PP                (#LCD_WR)
- * PA2  - Alternate output  (BUZZER)
+ * PA2  - PP                (#LCD_RD)
  * PA3  - PP                (#USB_DIS)
  * PA4  - PP                (#SPI1_CS)
  * PA5  - Alternate output  (SPI1_SCLK)
@@ -89,12 +92,10 @@
  * PA8  - PP                (LCD_BL)
  * PA9  - Alternate output  (USART1 TX).
  * PA10 - Normal input      (USART1 RX).
- * PA13 - Normal input      (#CARD)
- * PA14 - PP                (#LCD_RD)
  * PA15 - PP                (#TP_CS)
  */
 #define VAL_GPIOACRL            0x88883833      /*  PA7...PA0 */
-#define VAL_GPIOACRH            0x38888883      /* PA15...PA8 */
+#define VAL_GPIOACRH            0x388888B3      /* PA15...PA8 */
 #define VAL_GPIOAODR            0xFFFFFFFF
 
 /*
@@ -109,7 +110,7 @@
 /*
  * Port C setup.
  * Everything input with pull-up except:
- * PC13 - Push Pull output (LED).
+ * PC13 - Push Pull output (#LCD_CS).
  */
 #define VAL_GPIOCCRL            0x44888888      /*  PC7...PC0 */
 #define VAL_GPIOCCRH            0x88388888      /* PC15...PC8 */

@@ -150,6 +150,9 @@ int main(void)
     halInit();
     chSysInit();
 
+    sdStart(&SD1, NULL);
+    sdWrite(&SD1, "Hello world!\r\n", 14);
+
     myusbInit();
 
     /*
@@ -167,6 +170,7 @@ int main(void)
      * sleeping in a loop and check the button state.
      */
     while (TRUE) {
+        sdWrite(&SD1, "Next line\r\n", 11);
         if (!shelltp && (SDU1.config->usbp->state == USB_ACTIVE))
             shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
         else if (chThdTerminated(shelltp)) {

@@ -144,6 +144,8 @@ SZ   = $(TRGT)size
 HEX  = $(CP) -O ihex
 BIN  = $(CP) -O binary
 
+GDB  = $(TRGT)gdb
+
 # ARM-specific options here
 AOPT =
 
@@ -210,8 +212,17 @@ RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
 include $(RULESPATH)/rules.mk
 
 
-.PHONY: tags openocd load stlink stload
+.PHONY: tags openocd load
 
 tags:
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ${CHIBIOS}/os
+
+
+openocd:
+		openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
+
+OPENOCD_LOADFILE+=$(BUILDDIR)/$(PROJECT).elf
+
+load: $(OPENOCD_LOADFILE)
+		$(GDB) -x load_stlink.gdb $<
 
