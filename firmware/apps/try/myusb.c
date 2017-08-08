@@ -21,18 +21,19 @@ SerialUSBDriver SDU1;
  * USB Device Descriptor.
  */
 static const uint8_t vcom_device_descriptor_data[18] = {
-    USB_DESC_DEVICE       (0x0110,        /* bcdUSB (1.1).                    */
-    0x02,          /* bDeviceClass (CDC).              */
-    0x00,          /* bDeviceSubClass.                 */
-    0x00,          /* bDeviceProtocol.                 */
-    0x40,          /* bMaxPacketSize.                  */
-    0x0483,        /* idVendor (ST).                   */
-    0x5740,        /* idProduct.                       */
-    0x0200,        /* bcdDevice.                       */
-    1,             /* iManufacturer.                   */
-    2,             /* iProduct.                        */
-    3,             /* iSerialNumber.                   */
-    1)             /* bNumConfigurations.              */
+    USB_DESC_DEVICE       (
+        0x0110,        /* bcdUSB (1.1).                    */
+        0x02,          /* bDeviceClass (CDC).              */
+        0x00,          /* bDeviceSubClass.                 */
+        0x00,          /* bDeviceProtocol.                 */
+        0x40,          /* bMaxPacketSize.                  */
+        0x0483,        /* idVendor (ST).                   */
+        0x5740,        /* idProduct.                       */
+        0x0200,        /* bcdDevice.                       */
+        1,             /* iManufacturer.                   */
+        2,             /* iProduct.                        */
+        3,             /* iSerialNumber.                   */
+        1)             /* bNumConfigurations.              */
 };
 
 /*
@@ -46,24 +47,26 @@ static const USBDescriptor vcom_device_descriptor = {
 /* Configuration Descriptor tree for a CDC.*/
 static const uint8_t vcom_configuration_descriptor_data[67] = {
     /* Configuration Descriptor.*/
-    USB_DESC_CONFIGURATION(67,            /* wTotalLength.                    */
-    0x02,          /* bNumInterfaces.                  */
-    0x01,          /* bConfigurationValue.             */
-    0,             /* iConfiguration.                  */
-    0xC0,          /* bmAttributes (self powered).     */
-    50),           /* bMaxPower (100mA).               */
+    USB_DESC_CONFIGURATION(
+        67,            /* wTotalLength.                    */
+        0x02,          /* bNumInterfaces.                  */
+        0x01,          /* bConfigurationValue.             */
+        0,             /* iConfiguration.                  */
+        0xC0,          /* bmAttributes (self powered).     */
+        50),           /* bMaxPower (100mA).               */
     /* Interface Descriptor.*/
-    USB_DESC_INTERFACE    (0x00,          /* bInterfaceNumber.                */
-    0x00,          /* bAlternateSetting.               */
-    0x01,          /* bNumEndpoints.                   */
-    0x02,          /* bInterfaceClass (Communications
-                                           Interface Class, CDC section
-                                           4.2).                            */
-    0x02,          /* bInterfaceSubClass (Abstract
-                                         Control Model, CDC section 4.3).   */
-    0x01,          /* bInterfaceProtocol (AT commands,
-                                           CDC section 4.4).                */
-    0),            /* iInterface.                      */
+    USB_DESC_INTERFACE    (
+        0x00,          /* bInterfaceNumber.                */
+        0x00,          /* bAlternateSetting.               */
+        0x01,          /* bNumEndpoints.                   */
+        0x02,          /* bInterfaceClass (Communications
+                                            Interface Class, CDC section
+                                            4.2).                            */
+        0x02,          /* bInterfaceSubClass (Abstract
+                                            Control Model, CDC section 4.3).   */
+        0x01,          /* bInterfaceProtocol (AT commands,
+                                            CDC section 4.4).                */
+        0),            /* iInterface.                      */
     /* Header Functional Descriptor (CDC section 5.2.3).*/
     USB_DESC_BYTE         (5),            /* bLength.                         */
     USB_DESC_BYTE         (0x24),         /* bDescriptorType (CS_INTERFACE).  */
@@ -320,7 +323,7 @@ void myusbInit(void)
      * after a reset.
      */
     usbDisconnectBus(serusbcfg.usbp);
-    chThdSleepMilliseconds(1500);
+    chThdSleepMilliseconds(500);
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 }

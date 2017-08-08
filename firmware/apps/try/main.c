@@ -16,14 +16,19 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
-#include "ch.h"
-#include "hal.h"
+#include <ch.h>
+#include <hal.h>
 
-#include "shell.h"
-#include "chprintf.h"
+#include <chrtclib.h>
+#include <shell.h>
+#include <chprintf.h>
 
-#include "myusb.h"
+#include <myusb.h>
+
+#include "yx32b.h"
 
 
 /*===========================================================================*/
@@ -67,6 +72,7 @@ static void cmd_threads(BaseSequentialStream *chp, int argc, char *argv[]) {
     } while (tp != NULL);
 }
 
+/*
 static void cmd_write(BaseSequentialStream *chp, int argc, char *argv[]) {
     static uint8_t buf[] =
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
@@ -97,11 +103,32 @@ static void cmd_write(BaseSequentialStream *chp, int argc, char *argv[]) {
     }
     chprintf(chp, "\r\n\nstopped\r\n");
 }
+*/
+
+static void cmd_lcd_init(BaseSequentialStream *chp, int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+    chprintf(chp, "\r\nTry to init LCD\r\n");
+    uint16_t status = lcdInit();
+    chprintf(chp, "LCD status 0x%04x\r\n", status);
+}
+
+static void cmd_set_utime(BaseSequentialStream *chp, int argc, char *argv[]) {
+    time_t utime;
+    if ((argc != 1) || (utime = atoi(argv[0])) == 0) {
+        chprintf(chp, "Usage: set_utime <unix time value>\r\n");
+        return;
+    }
+    rtcSetTimeUnixSec(&RTCD1, utime);
+    chprintf(chp, "Set new time %d\r\n", utime);
+}
 
 static const ShellCommand commands[] = {
     {"mem", cmd_mem},
     {"threads", cmd_threads},
-    {"write", cmd_write},
+    // {"write", cmd_write},
+    {"init", cmd_lcd_init},
+    {"set_utime", cmd_set_utime},
     {NULL, NULL}
 };
 
@@ -133,6 +160,11 @@ static msg_t Thread1(void *arg)
     return 0;
 }
 
+
+RTCTime timespec;
+uint32_t prev_time;
+char buf[128];
+
 /*
  * Application entry point.
  */
@@ -150,8 +182,11 @@ int main(void)
     halInit();
     chSysInit();
 
+
+    palClearPad(GPIOA, GPIOA_LCD_BL);
+
     sdStart(&SD1, NULL);
-    sdWrite(&SD1, "Hello world!\r\n", 14);
+    // sdWrite(&SD1, "Hello world!\r\n", 14);
 
     myusbInit();
 
@@ -165,19 +200,44 @@ int main(void)
      */
     chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
+    // chThdSleepMilliseconds(100);
+    int lcdStat = lcdInit();
+    if (lcdStat == 0) {
+        palSetPad(GPIOA, GPIOA_LCD_BL);
+    }
+    lcdTest();
+
     /*
      * Normal main() thread activity, in this demo it does nothing except
      * sleeping in a loop and check the button state.
      */
     while (TRUE) {
-        sdWrite(&SD1, "Next line\r\n", 11);
+        // sdWrite(&SD1, "Next line\r\n", 11);
         if (!shelltp && (SDU1.config->usbp->state == USB_ACTIVE))
             shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
         else if (chThdTerminated(shelltp)) {
             chThdRelease(shelltp);    /* Recovers memory of the previous shell.   */
             shelltp = NULL;           /* Triggers spawning of a new shell.        */
         }
-        chThdSleepMilliseconds(1000);
+
+        rtcGetTime(&RTCD1, &timespec);
+        if (prev_time != timespec.tv_sec) {
+            prev_time = timespec.tv_sec;
+            chsnprintf(buf, sizeof(buf), "%10d", timespec.tv_sec);
+            lcdStr(20, 20, buf, COLOR_RED, COLOR_BLACK);
+            struct tm tim;
+            rtcGetTimeTm(&RTCD1, &tim);
+            chsnprintf(buf, sizeof(buf), "%04d/%02d/%02d %02d:%02d:%02d",
+                tim.tm_year + 1900,
+                tim.tm_mon + 1,
+                tim.tm_mday,
+                tim.tm_hour,
+                tim.tm_min,
+                tim.tm_sec
+            );
+            lcdStr(20, 28, buf, COLOR_GREEN, COLOR_BLACK);
+        }
+        chThdSleepMilliseconds(50);
     }
 }
 

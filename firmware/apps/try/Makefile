@@ -81,9 +81,12 @@ CSRC = $(PORTSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(CHIBIOS)/os/various/chprintf.c \
+       $(CHIBIOS)/os/various/chrtclib.c \
        $(CHIBIOS)/os/various/memstreams.c \
+       $(CHIBIOS)/os/various/syscalls.c \
        shell.c \
        myusb.c \
+       yx32b.c fnt8x8.c \
        main.c
 #       $(CHIBIOS)/os/various/shell.c \
 
@@ -219,10 +222,14 @@ tags:
 
 
 openocd:
-		openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
+	openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
 
 OPENOCD_LOADFILE+=$(BUILDDIR)/$(PROJECT).elf
+OPENOCD_LOADFILE_HEX=$(BUILDDIR)/$(PROJECT).hex
 
-load: $(OPENOCD_LOADFILE)
-		$(GDB) -x load_stlink.gdb $<
+#load: $(OPENOCD_LOADFILE)
+#	$(GDB) -x load_stlink.gdb $<
+
+load: $(OPENOCD_LOADFILE_HEX)
+	st-flash --format ihex write $<
 

@@ -41,9 +41,10 @@
 /*
  * IO pins assignments.
  */
+#define GPIOC_LCD_CS            13
 #define GPIOA_LCD_RS            0
 #define GPIOA_LCD_WR            1
-#define GPIOA_LCR_RD            2
+#define GPIOA_LCD_RD            2
 #define GPIOA_USB_DISC          3
 #define GPIOA_SPI1_CS           4
 #define GPIOA_SPI1_SCLK         5
@@ -87,14 +88,14 @@
  * PA3  - PP                (#USB_DIS)
  * PA4  - PP                (#SPI1_CS)
  * PA5  - Alternate output  (SPI1_SCLK)
- * PA6  - Alternate output  (SPI1_MISO)
+ * PA6  - Alternate input   (SPI1_MISO)
  * PA7  - Alternate output  (SPI1_MOSI)
  * PA8  - PP                (LCD_BL)
  * PA9  - Alternate output  (USART1 TX).
  * PA10 - Normal input      (USART1 RX).
  * PA15 - PP                (#TP_CS)
  */
-#define VAL_GPIOACRL            0x88883833      /*  PA7...PA0 */
+#define VAL_GPIOACRL            0xB8B33333      /*  PA7...PA0 */
 #define VAL_GPIOACRH            0x388888B3      /* PA15...PA8 */
 #define VAL_GPIOAODR            0xFFFFFFFF
 
@@ -112,7 +113,7 @@
  * Everything input with pull-up except:
  * PC13 - Push Pull output (#LCD_CS).
  */
-#define VAL_GPIOCCRL            0x44888888      /*  PC7...PC0 */
+#define VAL_GPIOCCRL            0x88888888      /*  PC7...PC0 */
 #define VAL_GPIOCCRH            0x88388888      /* PC15...PC8 */
 #define VAL_GPIOCODR            0xFFFFFFFF
 

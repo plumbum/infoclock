@@ -47,4 +47,10 @@ void __early_init(void) {
  * Board-specific initialization code.
  */
 void boardInit(void) {
+    AFIO->MAPR = AFIO->MAPR
+        // | AFIO_MAPR_CAN_REMAP_REMAP2            /*!< CANRX mapped to PB8, CANTX mapped to PB9 */
+        // | AFIO_MAPR_TIM3_REMAP_PARTIALREMAP     /*!< Partial remap (CH1/PB4, CH2/PB5, CH3/PB0, CH4/PB1) */
+        // | AFIO_MAPR_USART3_REMAP_PARTIALREMAP  /* USART3 Partial remap TX/PC10, RX/PC11 */
+        | AFIO_MAPR_SWJ_CFG_JTAGDISABLE         /* Disable JTAG, enable SWD */
+    ;
 }
