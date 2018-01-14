@@ -6,7 +6,6 @@ $8989 constant LCD-ID \ Controller: SSD1289 / Display: TFT8K1711FPC-A1-E / Board
 \ Geometry
 320 constant lcd_width
 240 constant lcd_height
-lcd_width lcd_height * constant lcd_area
 
 \ Pins and port definite
 PA8  constant lcd_bl
@@ -19,51 +18,44 @@ lcd_d0 io-base constant lcd_port_base
 lcd_port_base GPIO.ODR + constant lcd_port_odr
 lcd_port_base GPIO.IDR + constant lcd_port_idr
 
-: (lcd_cs_mark) ( -- ) lcd_cs ioc! ;
-: (lcd_cs_rel) ( -- ) lcd_cs ios! ;
-
-: (lcd_reg_cmd) ( -- ) lcd_rs ioc! ;
-: (lcd_reg_data) ( -- ) lcd_rs ios! ;
+: lcd_cs_on lcd_cs ioc! ;
+: lcd_cs_off lcd_cs ios! ;
 
 \ Read whole port
-: (lcd_port_read) ( -- data ) lcd_port_idr @ ;
+: (lcd_read) ( -- data )
+    lcd_rd ioc!
+    lcd_port_idr @
+    lcd_rd ios!
+;
 
 \ Write whole port
-: (lcd_port_write) ( data -- ) lcd_port_odr ! ;
+: (lcd_write) ( data -- )
+    lcd_port_odr ! lcd_wr ioc! lcd_wr ios!
+;
 
-: (lcd_port_read_mode) ( -- ) $FFFF (lcd_port_write) IMODE-PULL lcd_d0 $FFFF io-modes! ;
-: (lcd_port_write_mode) ( -- ) OMODE-PP OMODE-FAST + lcd_d0 $FFFF io-modes! ;
+: (lcd_port_read_mode) ( -- )
+    $FFFF lcd_port_odr !
+    IMODE-PULL lcd_d0 $FFFF io-modes!
+;
 
-: (lcd_read_mode) ( -- ) (lcd_port_read_mode) lcd_wr ios! lcd_rd ioc! ;
-: (lcd_write_mode) ( -- ) lcd_rd ios! lcd_wr ioc! (lcd_port_write_mode) ;
-
-\ Read data or status from display
-: (lcd_read_once) ( -- data )
-    (lcd_read_mode)
-    (lcd_cs_mark)
-    nop (lcd_port_read)
-    (lcd_cs_rel)
-    (lcd_write_mode)
+: (lcd_port_write_mode) ( -- )
+    OMODE-PP OMODE-FAST + lcd_d0 $FFFF io-modes!
 ;
 
 \ Read device code word
 : lcd_read_id ( -- device_code )
-    (lcd_reg_cmd)
-    (lcd_read_once)
-;
-
-\ Write data or command to display.
-: (lcd_write) ( data -- )
-    \ (lcd_port_write) (lcd_cs_mark) (lcd_cs_rel)
-    lcd_port_odr ! lcd_cs ioc! lcd_cs ios!
+    (lcd_port_read_mode)
+    lcd_rs ioc! \ Status register
+    nop
+    (lcd_read)
 ;
 
 \ Write register
 : lcd_reg_write ( data idx -- )
-    (lcd_write_mode)
-    (lcd_reg_cmd)
+    (lcd_port_write_mode)
+    lcd_rs ioc! \ Register index
     (lcd_write)
-    (lcd_reg_data)
+    lcd_rs ios! \ Data
     (lcd_write)
 ;
 
@@ -73,15 +65,43 @@ lcd_port_base GPIO.IDR + constant lcd_port_idr
     $F8 and 8 lshift or \ red
 ;
 
-: lcd_fill ( color -- )
-    0 $4f lcd_reg_write
-    0 $4e lcd_reg_write
-    (lcd_reg_cmd) $22 (lcd_write)
-    (lcd_reg_data)
-    lcd_area 0 do
-        dup (lcd_write)
+: lcd_area ( x1 y1 x2 y2 -- square )
+    (lcd_port_write_mode)
+    \ Horizontal RAM address position (R44h) 
+    dup 8 lshift
+    3 pick
+    or $44 lcd_reg_write
+    \ Vertical RAM address position (R45h-R46h) 
+    over $46 lcd_reg_write
+    3 pick $45 lcd_reg_write
+    3 pick $4f lcd_reg_write \ set X
+    2 pick $4e lcd_reg_write \ set Y
+    \ Calculate square
+    rot - 1+ \ Y subs
+    -rot swap - 1+ \ X subs
+    * \ Xs*Ys
+;
+
+: lcd_box ( x1 y1 x2 y2 color -- )
+    >r
+    lcd_area
+    r> swap
+    lcd_rs ioc! \ Index
+    $22 (lcd_write) \ Write command
+    lcd_rs ios! \ Data
+    0 do
+        \ dup (lcd_write) \ Write data
+        \ Speed up
+        dup lcd_port_odr ! lcd_wr ioc! lcd_wr ios!
     loop
     drop
+;
+
+: lcd_clear ( color -- )
+    >r
+    0 0 lcd_width 1- lcd_height 1-
+    r>
+    lcd_box
 ;
 
 : lcd_pixel ( x y color -- )
@@ -94,28 +114,69 @@ lcd_port_base GPIO.IDR + constant lcd_port_idr
 $FFFF variable lcd_fg_color
 $0000 variable lcd_bg_color
 
+: lcd_bigchar ( char x y -- )
+    dup 29 + \ Height 30
+    2 pick 15 + \ Width 16
+    swap
+    lcd_area
+    swap
+    32 - \ Ctrl chars skip
+    64 * \ Char offset
+    16 + \ Skip header
+    font16x30 +
+
+    \ Entry mode setting (R11h)
+    \ R11H Entry mode
+    \ vsmode DFM1 DFM0 TRANS OEDef WMode DMode1 DMode0 TY1 TY0 ID1 ID0 AM LG2 LG2 LG0
+    \   0     1    1     0     0     0     0      0     0   1   1   1  *   0   0   0
+    \ Temporary change write directon
+    $6070 $11 lcd_reg_write
+
+    lcd_rs ioc! \ Index
+    $22 (lcd_write) \ Write command
+    lcd_rs ios! \ Data
+    swap 0 do
+        31 1 do
+            i $1F xor bit over bit@
+            if lcd_fg_color else lcd_bg_color then
+            \ @ (lcd_write) \ Write data
+            \ Speed up
+            @ lcd_port_odr ! lcd_wr ioc! lcd_wr ios!
+        loop
+        4 +
+    30 +loop
+    drop
+    \ Recovery write direction
+    $6078 $11 lcd_reg_write \ 0x6070
+;
+
+
 : setcolor ( color -- ) lcd_fg_color ! ;
 
-: setb ( color -- ) lcd_bg_color ! ;
+: setbgcolor ( color -- ) lcd_bg_color ! ;
 
 : putpixel ( x y -- ) lcd_fg_color @ lcd_pixel ;
 
-: clear ( -- ) lcd_bg_color @ lcd_fill ;
+: clear ( -- ) lcd_bg_color @ lcd_clear ;
 
 : display ( -- ) ; \ Does nothing
 
 : showdigit ( n x y -- )
     rot 256 * digits + 
+    (lcd_port_write_mode)
     64 0 do
         ( x y ptr )
         2 pick $4f lcd_reg_write \ set X
         over i + $4e lcd_reg_write \ set Y
-        (lcd_reg_cmd) $22 (lcd_write)
-        (lcd_reg_data)
+        lcd_rs ioc! \ Command register
+        $22 (lcd_write)
+        lcd_rs ios! \ Data register
         32 0 do
             i $1F xor bit over bit@
             if lcd_fg_color else lcd_bg_color then
-            @ (lcd_write)
+            \ @ (lcd_write) \ Write data
+            \ Speed up
+            @ lcd_port_odr ! lcd_wr ioc! lcd_wr ios!
         loop
         4 +
     loop
@@ -131,8 +192,13 @@ $0000 variable lcd_bg_color
     96 0 showdigit
 ;
 
-: test now 1000 0 do i shownum loop now swap - cr . cr ;
-
+: test
+    lcd_cs_on
+    millis
+    100 0 do i shownum loop
+    millis swap - cr . cr
+    lcd_cs_off
+;
 
 : (lcd_init_pins) ( -- )
     lcd_bl ioc! OMODE-PP OMODE-FAST + lcd_bl io-mode!
@@ -140,11 +206,14 @@ $0000 variable lcd_bg_color
     lcd_wr ios! OMODE-PP OMODE-FAST + lcd_wr io-mode!
     lcd_rd ios! OMODE-PP OMODE-FAST + lcd_rd io-mode!
     lcd_rs ioc! OMODE-PP OMODE-FAST + lcd_rs io-mode!
-    0 (lcd_port_write) (lcd_port_write_mode)
+    $FFFF (lcd_write)
+    (lcd_port_read_mode)
 ;
 
 : lcd_init ( -- )
     (lcd_init_pins)
+
+    lcd_cs_on
     \ power supply setting
     \ set R07h at 0021h (GON=1,DTE=0,D[1:0]=01)
     $0021 $07 lcd_reg_write
@@ -211,9 +280,11 @@ $0000 variable lcd_bg_color
     $0000 $4f lcd_reg_write \ Set GDDRAM X address counter 
     $0000 $4e lcd_reg_write \ Set GDDRAM Y address counter 
 
-    lcd_bl ios!
+    lcd_bl ios! \ Enable backlight
 
-    0 0 $99 lcd_mkcolor lcd_fill
+    0 0 $66 lcd_mkcolor lcd_clear
+
+    lcd_cs_off
 ;
 
 \ lcd_bl ios!
